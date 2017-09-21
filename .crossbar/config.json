@@ -1,0 +1,103 @@
+{
+    "version": 2,
+    "controller": {},
+    "workers": [
+        {
+            "type": "router",
+            "realms": [
+                {
+                    "name": "agent",
+                    "roles": [
+                        {
+                            "name": "github",
+                            "permissions": [
+                                {
+                                    "uri": "webhook.github.",
+                                    "match": "prefix",
+                                    "allow": {
+                                        "publish": true
+                                    },
+                                    "disclose": {
+                                        "caller": false,
+                                        "publisher": true
+                                    },
+                                    "cache": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "builder",
+                            "permissions": [
+                                {
+                                    "uri": "webhook.github.",
+                                    "match": "prefix",
+                                    "allow": {
+                                        "subscribe": true
+                                    },
+                                    "disclose": {
+                                        "caller": false,
+                                        "publisher": true
+                                    },
+                                    "cache": true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "transports": [
+                {
+                    "type": "websocket",
+                    "endpoint": {
+                        "type": "unix",
+                        "path": "sock"
+                    },
+                    "auth": {
+                        "cryptosign": {
+                            "type": "static",
+                            "principals": {
+                                "builder": {
+                                    "realm": "agent",
+                                    "role": "builder",
+                                    "authorized_keys": [
+                                        "eddfce7a778f6e513a3026936c4195b4bb747e6a1da438b70a217e1d3004268d"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "websocket",
+                    "endpoint": {
+                        "type": "onion",
+                        "port": 5000,
+                        "private_key_file": "service_key.blob",
+                        "tor_control_endpoint": {
+                            "type": "unix",
+                            "path": "/var/run/tor/control"
+                        }
+                    },
+                    "auth": {
+                        "anonymous": {
+                            "type": "static",
+                            "role": "public"
+                        },
+                        "cryptosign": {
+                            "type": "static",
+                            "principals": {
+                                "agent": {
+                                    "realm": "agent",
+                                    "role": "github",
+                                    "authorized_keys": [
+                                        "9c41d36325c8a38c7d24cae2a5ac56f4eaa0e1dcb6fa2325d097f1b7891e0b9f"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

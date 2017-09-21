@@ -1,0 +1,5 @@
+secrets-*
+.crossbar/*.priv
+.crossbar/*.key
+.crossbar/service_key.blob
+.crossbar/node.pid
